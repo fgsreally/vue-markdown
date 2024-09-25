@@ -1,0 +1,36 @@
+name: Publish
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*" 
+env:
+  PNPM_CACHE_FOLDER: .pnpm-store
+  NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      # Setup .npmrc file to publish to npm
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '21.x'
+          registry-url: 'https://registry.npmjs.org'
+      - uses: pnpm/action-setup@v2.0.1
+        name: Install pnpm
+        id: pnpm-install
+        with:
+          version: 8
+          run_install: |
+            - recursive: true
+              args: [--no-frozen-lockfile]
+     
+      - name: Build Package
+        run: pnpm build
+      - name: Publish Package
+        run: pnpm publish
+
